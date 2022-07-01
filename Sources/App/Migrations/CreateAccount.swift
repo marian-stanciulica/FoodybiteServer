@@ -7,13 +7,15 @@
 
 import Fluent
 
-struct CreateAccount: Migration {
+struct CreateUser: Migration {
   
     func prepare(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("account")
+        database.schema("user")
             .id()
             .field("name", .string, .required)
             .field("email", .string, .required)
+            .field("password", .string, .required)
+            .unique(on: "email")
             .create()
     }
     
@@ -22,3 +24,4 @@ struct CreateAccount: Migration {
     }
     
 }
+
