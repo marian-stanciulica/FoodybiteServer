@@ -23,7 +23,7 @@ final class User: Model {
     @Field(key: "name")
     var name: String
     
-    @OptionalField(key: "profile_image")
+    @OptionalField(key: "profile_image_url")
     var profileImageURL: String?
     
     @OptionalField(key: "followers_count")

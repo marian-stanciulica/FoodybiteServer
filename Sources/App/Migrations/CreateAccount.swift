@@ -15,6 +15,9 @@ struct CreateUser: Migration {
             .field("name", .string, .required)
             .field("email", .string, .required)
             .field("password", .string, .required)
+            .field("profile_image_url", .string)
+            .field("followers_count", .int)
+            .field("following_count", .int)
             .unique(on: "email")
             .create()
     }
