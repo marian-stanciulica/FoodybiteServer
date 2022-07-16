@@ -15,14 +15,10 @@ struct NewSession: Content {
 
 struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let usersRoute = routes.grouped("users")
-        usersRoute.post("signup", use: signup)
-        
-//        let tokenProtected = usersRoute.grouped(Token.authenticator())
-//        tokenProtected.get("me", use: getMe)
-//
-//        let passwordProtected = usersRoute.grouped(User.authenticator())
-//        passwordProtected.post("login", use: login)
+        routes.group("auth") { auth in
+            auth.post("signup", use: signup)
+            auth.post("login", use: login)
+        }
     }
     
     private func getMe(_ request: Request) throws -> User.Public {
@@ -55,11 +51,45 @@ struct UserController: RouteCollection {
         .transform(to: .created)
     }
     
-//    private func login(_ request: Request) async throws -> NewSession {
-//        let user = try request.auth.require(User.self)
-//        let token = user.createToken(userID: user.id!)
-//        try await token.save(on: request.db)
-//        return NewSession(token: token.value, user: user.asPublic())
-//    }
-    
+    private func login(_ req: Request) throws -> EventLoopFuture<LoginResponse> {
+        try LoginRequest.validate(content: req)
+        let loginRequest = try req.content.decode(LoginRequest.self)
+        
+        return req.users
+            .find(email: loginRequest.email)
+            .unwrap(or: AuthenticationError.invalidEmailOrPassword)
+//            .guard({ $0.isEmailVerified }, else: AuthenticationError.emailIsNotVerified)
+            .flatMap { user -> EventLoopFuture<User> in
+                return req.password
+                    .async
+                    .verify(loginRequest.password, created: user.password)
+                    .guard({ $0 == true }, else: AuthenticationError.invalidEmailOrPassword)
+                    .transform(to: user)
+        }
+        .flatMap { user -> EventLoopFuture<User> in
+            do {
+                return try req.refreshTokens.delete(for: user.requireID()).transform(to: user)
+            } catch {
+                return req.eventLoop.makeFailedFuture(error)
+            }
+        }
+        .flatMap { user in
+            do {
+                let token = req.random.generate(bits: 256)
+                let refreshToken = try RefreshToken(token: SHA256.hash(token), userID: user.requireID())
+                
+                return req.refreshTokens
+                    .create(refreshToken)
+                    .flatMapThrowing {
+                        try LoginResponse(
+                            user: user.asPublic(),
+                            accessToken: req.jwt.sign(Payload(with: user)),
+                            refreshToken: token
+                        )
+                }
+            } catch {
+                return req.eventLoop.makeFailedFuture(error)
+            }
+        }
+    }
 }
