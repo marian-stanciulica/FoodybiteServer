@@ -18,12 +18,20 @@ struct UserController: RouteCollection {
         routes.group("auth") { auth in
             auth.post("signup", use: signup)
             auth.post("login", use: login)
+            
+            auth.group(UserAuthenticator()) { authenticated in
+                authenticated.get("me", use: getCurrentUser)
+            }
         }
     }
     
-    private func getMe(_ request: Request) throws -> User.Public {
-        let user = try request.auth.require(User.self)
-        return user.asPublic()
+    private func getCurrentUser(_ req: Request) throws -> EventLoopFuture<User.Public> {
+        let payload = try req.auth.require(Payload.self)
+        
+        return req.users
+            .find(id: payload.userID)
+            .unwrap(or: AuthenticationError.userNotFound)
+            .map { $0.asPublic() }
     }
     
     private func signup(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
