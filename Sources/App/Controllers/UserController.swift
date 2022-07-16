@@ -8,45 +8,58 @@
 import Vapor
 import FluentKit
 
-struct UserController: RouteCollection {
-    func boot(routes: RoutesBuilder) throws {
-        routes.get("users", use: getAll)
-        routes.post("signup", use: signup)
-        routes.post("login", use: login)
-    }
-    
-    func getAll(_ request: Request) throws -> EventLoopFuture<[User.Public]> {
-        return User.query(on: request.db).all().convertToPublic()
-    }
-    
-    func signup(_ request: Request) throws -> EventLoopFuture<User.Public> {
-        let user = try request.content.decode(User.self)
-        user.password = try Bcrypt.hash(user.password)
-        return user.save(on: request.db).map { user.convertToPublic() }
-    }
-    
-    func login(_ request: Request) throws -> EventLoopFuture<User.Public> {
-        let input = try request.content.decode(LoginData.self)
-        let password = try Bcrypt.hash(input.password)
-        
-        return User.query(on: request.db)
-            .group(.and) { and in
-                and.filter(\.$email == input.email)
-//                and.filter(\.$password == input.password)
-            }
-            .first()
-            .flatMapThrowing { user in
-                if let user = user {
-                    return user.convertToPublic()
-                } else {
-                    throw Abort(.notFound)
-                }
-            }
-    }
-    
+struct NewSession: Content {
+    let token: String
+    let user: User.Public
 }
 
-struct LoginData: Content {
-    let email: String
-    let password: String
+struct UserController: RouteCollection {
+    func boot(routes: RoutesBuilder) throws {
+        let usersRoute = routes.grouped("users")
+        usersRoute.post("signup", use: signup)
+        
+//        let tokenProtected = usersRoute.grouped(Token.authenticator())
+//        tokenProtected.get("me", use: getMe)
+//
+//        let passwordProtected = usersRoute.grouped(User.authenticator())
+//        passwordProtected.post("login", use: login)
+    }
+    
+    private func getMe(_ request: Request) throws -> User.Public {
+        let user = try request.auth.require(User.self)
+        return user.asPublic()
+    }
+    
+    private func signup(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        try RegisterRequest.validate(content: req)
+        let registerRequest = try req.content.decode(RegisterRequest.self)
+        guard registerRequest.password == registerRequest.confirm_password else {
+            throw AuthenticationError.passwordsDontMatch
+        }
+        
+        return req.password
+            .async
+            .hash(registerRequest.password)
+            .flatMapThrowing { try User(from: registerRequest, hash: $0) }
+            .flatMap { user in
+                req.users
+                    .create(user)
+                    .flatMapErrorThrowing {
+                        if let dbError = $0 as? DatabaseError, dbError.isConstraintFailure {
+                            throw AuthenticationError.emailAlreadyExists
+                        }
+                        throw $0
+                }
+//                .flatMap { req.emailVerifier.verify(for: user) }
+        }
+        .transform(to: .created)
+    }
+    
+//    private func login(_ request: Request) async throws -> NewSession {
+//        let user = try request.auth.require(User.self)
+//        let token = user.createToken(userID: user.id!)
+//        try await token.save(on: request.db)
+//        return NewSession(token: token.value, user: user.asPublic())
+//    }
+    
 }

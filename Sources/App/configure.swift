@@ -16,10 +16,11 @@ public func configure(_ app: Application) throws {
     ), as: .psql)
 
     app.migrations.add(CreateUser())
+    app.migrations.add(CreateRefreshToken())
     
     app.logger.logLevel = .debug
     try app.autoMigrate().wait()
     
-    // register routes
+    try services(app)
     try routes(app)
 }
