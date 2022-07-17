@@ -18,6 +18,7 @@ struct UserController: RouteCollection {
         routes.group("auth") { auth in
             auth.post("signup", use: signup)
             auth.post("login", use: login)
+            auth.post("accessToken", use: refreshAccessToken)
             
             auth.group(UserAuthenticator()) { authenticated in
                 authenticated.get("me", use: getCurrentUser)
@@ -100,4 +101,34 @@ struct UserController: RouteCollection {
             }
         }
     }
+    
+    private func refreshAccessToken(_ req: Request) throws -> EventLoopFuture<AccessTokenResponse> {
+        let accessTokenRequest = try req.content.decode(AccessTokenRequest.self)
+        let hashedRefreshToken = SHA256.hash(accessTokenRequest.refreshToken)
+        
+        return req.refreshTokens
+            .find(token: hashedRefreshToken)
+            .unwrap(or: AuthenticationError.refreshTokenOrUserNotFound)
+            .flatMap { req.refreshTokens.delete($0).transform(to: $0) }
+            .guard({ $0.expiresAt > Date() }, else: AuthenticationError.refreshTokenHasExpired)
+            .flatMap { req.users.find(id: $0.$user.id) }
+            .unwrap(or: AuthenticationError.refreshTokenOrUserNotFound)
+            .flatMap { user in
+                do {
+                    let token = req.random.generate(bits: 256)
+                    let refreshToken = try RefreshToken(token: SHA256.hash(token), userID: user.requireID())
+                    
+                    let payload = try Payload(with: user)
+                    let accessToken = try req.jwt.sign(payload)
+                    
+                    return req.refreshTokens
+                        .create(refreshToken)
+                        .transform(to: (token, accessToken))
+                } catch {
+                    return req.eventLoop.makeFailedFuture(error)
+                }
+        }
+        .map { AccessTokenResponse(refreshToken: $0, accessToken: $1) }
+    }
+    
 }
