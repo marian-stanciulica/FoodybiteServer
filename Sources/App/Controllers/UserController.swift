@@ -92,8 +92,10 @@ struct UserController: RouteCollection {
                     .flatMapThrowing {
                         try LoginResponse(
                             user: user.asPublic(),
-                            accessToken: req.jwt.sign(Payload(with: user)),
-                            refreshToken: token
+                            token: AuthToken(
+                                accessToken: req.jwt.sign(Payload(with: user)),
+                                refreshToken: token
+                            )
                         )
                 }
             } catch {

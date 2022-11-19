@@ -5,6 +5,7 @@ struct RegisterRequest: Content {
     let email: String
     let password: String
     let confirm_password: String
+    let profile_image: Data?
 }
 
 extension RegisterRequest: Validatable {
@@ -17,6 +18,6 @@ extension RegisterRequest: Validatable {
 
 extension User {
     convenience init(from register: RegisterRequest, hash: String) throws {
-        self.init(email: register.email, password: hash, name: register.name)
+        self.init(email: register.email, password: hash, name: register.name, profileImage: register.profile_image)
     }
 }

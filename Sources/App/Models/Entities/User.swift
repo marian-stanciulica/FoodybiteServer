@@ -23,8 +23,8 @@ final class User: Model, Authenticatable {
     @Field(key: "name")
     var name: String
     
-    @Field(key: "profile_image_url")
-    var profileImageURL: String
+    @Field(key: "profile_image")
+    var profileImage: Data?
     
     @Field(key: "followers_count")
     var followersCount: Int
@@ -34,12 +34,12 @@ final class User: Model, Authenticatable {
 
     init() {}
 
-    init(id: UUID? = nil, email: String, password: String, name: String) {
+    init(id: UUID? = nil, email: String, password: String, name: String, profileImage: Data?) {
         self.id = id
         self.email = email
         self.password = password
         self.name = name
-        self.profileImageURL = ""
+        self.profileImage = profileImage
         self.followingCount = 0
         self.followersCount = 0
     }
@@ -48,14 +48,15 @@ final class User: Model, Authenticatable {
         var id: UUID?
         var name: String
         var email: String
-        var profileImageURL: String = ""
+        var profileImage: Data?
         var followingCount = 0
         var followersCount = 0
         
-        init(id: UUID?, email: String, name: String) {
+        init(id: UUID?, email: String, name: String, profileImage: Data?) {
             self.id = id
             self.email = email
             self.name = name
+            self.profileImage = profileImage
         }
     }
     
@@ -63,7 +64,7 @@ final class User: Model, Authenticatable {
 
 extension User {
     func asPublic() -> Public {
-        return Public(id: id, email: email, name: name)
+        return Public(id: id, email: email, name: name, profileImage: profileImage)
     }
 }
 
