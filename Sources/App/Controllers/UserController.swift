@@ -22,6 +22,8 @@ struct UserController: RouteCollection {
             
             auth.group(UserAuthenticator()) { authenticated in
                 authenticated.get("me", use: getCurrentUser)
+                
+                authenticated.post("changePassword", use: changePassword)
             }
         }
     }
@@ -131,6 +133,26 @@ struct UserController: RouteCollection {
                 }
         }
         .map { AccessTokenResponse(refreshToken: $0, accessToken: $1) }
+    }
+    
+    private func changePassword(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let payload = try req.auth.require(Payload.self)
+
+        try ChangePasswordRequest.validate(content: req)
+        let changePasswordRequest = try req.content.decode(ChangePasswordRequest.self)
+        
+        return req.users
+            .find(id: payload.userID)
+            .unwrap(or: AuthenticationError.userNotFound)
+            .flatMap { user -> EventLoopFuture<Void> in
+                return req.password
+                    .async
+                    .hash(changePasswordRequest.newPassword)
+                    .flatMap { digest in
+                        req.users.set(\.$password, to: digest, for: user.id!)
+                }
+            }
+            .transform(to: .ok)
     }
     
 }
