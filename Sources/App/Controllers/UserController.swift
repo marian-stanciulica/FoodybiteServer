@@ -24,6 +24,7 @@ struct UserController: RouteCollection {
                 authenticated.get("me", use: getCurrentUser)
                 
                 authenticated.post("changePassword", use: changePassword)
+                authenticated.post("updateAccount", use: updateAccount)
                 authenticated.post("logout", use: logout)
             }
         }
@@ -168,6 +169,23 @@ struct UserController: RouteCollection {
                 } catch {
                     return req.eventLoop.makeFailedFuture(error)
                 }
+            }
+    }
+    
+    private func updateAccount(_ req: Request) throws -> EventLoopFuture<User.Public> {
+        let payload = try req.auth.require(Payload.self)
+
+        try UpdateAccountRequest.validate(content: req)
+        let updateAccountRequest = try req.content.decode(UpdateAccountRequest.self)
+        
+        return req.users
+            .find(id: payload.userID)
+            .unwrap(or: AuthenticationError.userNotFound)
+            .flatMap { user -> EventLoopFuture<User.Public> in
+                user.name = updateAccountRequest.name
+                user.email = updateAccountRequest.email
+                user.profileImage = updateAccountRequest.profileImage
+                return user.update(on: req.db).map { user.asPublic() }
             }
     }
     
