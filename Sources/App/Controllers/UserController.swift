@@ -24,6 +24,7 @@ struct UserController: RouteCollection {
                 authenticated.get("me", use: getCurrentUser)
                 
                 authenticated.post("changePassword", use: changePassword)
+                authenticated.post("logout", use: logout)
             }
         }
     }
@@ -153,6 +154,21 @@ struct UserController: RouteCollection {
                 }
             }
             .transform(to: .ok)
+    }
+    
+    private func logout(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let payload = try req.auth.require(Payload.self)
+        
+        return req.users
+            .find(id: payload.userID)
+            .unwrap(or: AuthenticationError.userNotFound)
+            .flatMap { user -> EventLoopFuture<HTTPStatus> in
+                do {
+                    return try req.refreshTokens.delete(for: user.requireID()).transform(to: .ok)
+                } catch {
+                    return req.eventLoop.makeFailedFuture(error)
+                }
+            }
     }
     
 }
