@@ -24,7 +24,9 @@ struct UserController: RouteCollection {
                 authenticated.get("me", use: getCurrentUser)
                 
                 authenticated.post("changePassword", use: changePassword)
-                authenticated.post("updateAccount", use: updateAccount)
+                authenticated.post("account", use: updateAccount)
+                authenticated.delete("account", use: deleteAccount)
+                
                 authenticated.post("logout", use: logout)
             }
         }
@@ -187,6 +189,11 @@ struct UserController: RouteCollection {
                 user.profileImage = updateAccountRequest.profileImage
                 return user.update(on: req.db).map { user.asPublic() }
             }
+    }
+    
+    private func deleteAccount(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let payload = try req.auth.require(Payload.self)
+        return req.users.delete(id: payload.userID).transform(to: .ok)
     }
     
 }

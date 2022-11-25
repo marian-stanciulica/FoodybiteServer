@@ -26,7 +26,7 @@ extension AuthenticationError: AbortError {
         case .emailTokenHasExpired:
             return .badRequest
         case .invalidEmailOrPassword:
-            return .unauthorized
+            return .notFound
         case .refreshTokenOrUserNotFound:
             return .notFound
         case .userNotFound:
