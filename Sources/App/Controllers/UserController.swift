@@ -16,7 +16,7 @@ struct NewSession: Content {
 struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         routes.group("auth") { auth in
-            auth.post("signup", use: signup)
+            auth.on(.POST, "signup", body: .collect(maxSize: "10mb"), use: signup)
             auth.post("login", use: login)
             auth.post("accessToken", use: refreshAccessToken)
             
@@ -47,6 +47,8 @@ struct UserController: RouteCollection {
         guard registerRequest.password == registerRequest.confirm_password else {
             throw AuthenticationError.passwordsDontMatch
         }
+        
+        req.logger.info("ceva \(registerRequest.profile_image?.count)")
         
         return req.password
             .async
