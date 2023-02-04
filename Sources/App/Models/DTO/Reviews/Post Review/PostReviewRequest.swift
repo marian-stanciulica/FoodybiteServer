@@ -1,6 +1,7 @@
 import Vapor
 
 struct PostReviewRequest: Content {
+    let placeID: String
     let text: String
     let stars: Int
 }

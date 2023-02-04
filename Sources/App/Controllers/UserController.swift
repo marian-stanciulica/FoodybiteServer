@@ -210,6 +210,7 @@ struct UserController: RouteCollection {
         let postReviewRequest = try req.content.decode(PostReviewRequest.self)
         
         let review = Review(userID: payload.userID,
+                            placeID: postReviewRequest.placeID,
                             text: postReviewRequest.text,
                             stars: postReviewRequest.stars)
         

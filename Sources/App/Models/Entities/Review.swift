@@ -10,6 +10,9 @@ final class Review: Model {
     @Parent(key: "user_id")
     var user: User
     
+    @Field(key: "place_id")
+    var placeID: String
+    
     @Field(key: "text")
     var text: String
     
@@ -18,9 +21,10 @@ final class Review: Model {
     
     init() {}
     
-    init(id: UUID? = nil, userID: UUID, text: String, stars: Int) {
+    init(id: UUID? = nil, userID: UUID, placeID: String, text: String, stars: Int) {
         self.id = id
         self.$user.id = userID
+        self.placeID = placeID
         self.text = text
         self.stars = stars
     }
