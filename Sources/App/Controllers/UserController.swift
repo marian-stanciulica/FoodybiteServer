@@ -30,6 +30,12 @@ struct UserController: RouteCollection {
                 authenticated.post("logout", use: logout)
             }
         }
+        
+        routes.group("review") { review in
+            review.group(UserAuthenticator()) { authenticated in
+                authenticated.post("", use: postReview)
+            }
+        }
     }
     
     private func getCurrentUser(_ req: Request) throws -> EventLoopFuture<User.Public> {
@@ -194,6 +200,19 @@ struct UserController: RouteCollection {
     private func deleteAccount(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         let payload = try req.auth.require(Payload.self)
         return req.users.delete(id: payload.userID).transform(to: .ok)
+    }
+    
+    private func postReview(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let payload = try req.auth.require(Payload.self)
+        
+        try PostReviewRequest.validate(content: req)
+        let postReviewRequest = try req.content.decode(PostReviewRequest.self)
+        
+        let review = Review(userID: payload.userID,
+                            text: postReviewRequest.text,
+                            stars: postReviewRequest.starsNumber)
+        
+        return req.reviews.create(review).transform(to: .ok)
     }
     
 }
