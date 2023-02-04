@@ -48,8 +48,6 @@ struct UserController: RouteCollection {
             throw AuthenticationError.passwordsDontMatch
         }
         
-        req.logger.info("ceva \(registerRequest.profile_image?.count)")
-        
         return req.password
             .async
             .hash(registerRequest.password)
