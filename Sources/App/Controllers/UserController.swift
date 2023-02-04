@@ -34,6 +34,7 @@ struct UserController: RouteCollection {
         routes.group("review") { review in
             review.group(UserAuthenticator()) { authenticated in
                 authenticated.post("", use: postReview)
+                authenticated.get("", use: getReviews)
             }
         }
     }
@@ -210,9 +211,17 @@ struct UserController: RouteCollection {
         
         let review = Review(userID: payload.userID,
                             text: postReviewRequest.text,
-                            stars: postReviewRequest.starsNumber)
+                            stars: postReviewRequest.stars)
         
         return req.reviews.create(review).transform(to: .ok)
+    }
+    
+    private func getReviews(_ req: Request) throws -> EventLoopFuture<[ReviewResponse]> {
+        let payload = try req.auth.require(Payload.self)
+        
+        return req.reviews.find(userID: payload.userID).mapEach {
+            return ReviewResponse(text: $0.text, stars: $0.stars)
+        }
     }
     
 }

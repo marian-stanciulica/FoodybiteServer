@@ -6,7 +6,7 @@ struct CreateReview: Migration {
             .id()
             .field("user_id", .uuid, .required, .references("users", "id", onDelete: .cascade))
             .field("text", .string, .required)
-            .field("stars", .int8, .required)
+            .field("stars", .uint, .required)
             .create()
     }
     
