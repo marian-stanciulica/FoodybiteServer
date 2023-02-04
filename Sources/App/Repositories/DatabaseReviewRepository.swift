@@ -20,8 +20,8 @@ struct DatabaseReviewRepository: ReviewRepository, DatabaseRepository {
 }
 
 extension Application.Repositories {
-    var reviews: RefreshTokenRepository {
-        guard let factory = storage.makeRefreshTokenRepository else {
+    var reviews: ReviewRepository {
+        guard let factory = storage.makeReviewRepository else {
             fatalError("RefreshToken repository not configured, use: app.repositories.use")
         }
         return factory(app)
