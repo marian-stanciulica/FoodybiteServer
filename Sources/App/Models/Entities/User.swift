@@ -31,6 +31,9 @@ final class User: Model, Authenticatable {
     
     @Field(key: "following_count")
     var followingCount: Int
+    
+    @Children(for: \.$user)
+    var reviews: [Review]
 
     init() {}
 
