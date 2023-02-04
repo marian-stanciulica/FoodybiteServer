@@ -8,6 +8,7 @@ extension Application {
                 .init {
                     $0.repositories.use { DatabaseUserRepository(database: $0.db) }
                     $0.repositories.use { DatabaseRefreshTokenRepository(database: $0.db) }
+                    $0.repositories.use { DatabaseReviewRepository(database: $0.db) }
                 }
             }
             
@@ -17,6 +18,7 @@ extension Application {
         final class Storage {
             var makeUserRepository: ((Application) -> UserRepository)?
             var makeRefreshTokenRepository: ((Application) -> RefreshTokenRepository)?
+            var makeReviewRepository: ((Application) -> ReviewRepository)?
             init() { }
         }
         
