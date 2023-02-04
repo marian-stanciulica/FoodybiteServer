@@ -8,6 +8,7 @@ struct CreateReview: Migration {
             .field("place_id", .string, .required)
             .field("text", .string, .required)
             .field("stars", .uint, .required)
+            .field("created_at", .date, .required)
             .create()
     }
     

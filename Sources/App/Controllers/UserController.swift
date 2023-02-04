@@ -220,9 +220,16 @@ struct UserController: RouteCollection {
     private func getReviews(_ req: Request) throws -> EventLoopFuture<[ReviewResponse]> {
         let payload = try req.auth.require(Payload.self)
         
-        return req.reviews.find(userID: payload.userID).mapEach {
-            return ReviewResponse(text: $0.text, stars: $0.stars)
-        }
+        return req.users
+            .find(id: payload.userID)
+            .unwrap(or: AuthenticationError.userNotFound)
+            .flatMap { user in
+                user.$reviews
+                    .get(on: req.db)
+                    .mapEach {
+                        ReviewResponse(profileImageData: user.profileImage, authorName: user.name, reviewText: $0.text, rating: $0.stars, createdAt: $0.createdAt)
+                    }
+            }
     }
     
 }

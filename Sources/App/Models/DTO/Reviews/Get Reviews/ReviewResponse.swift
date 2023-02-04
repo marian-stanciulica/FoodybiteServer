@@ -1,6 +1,9 @@
 import Vapor
 
 struct ReviewResponse: Content {
-    let text: String
-    let stars: Int
+    let profileImageData: Data?
+    let authorName: String
+    let reviewText: String
+    let rating: Int
+    let createdAt: Date
 }

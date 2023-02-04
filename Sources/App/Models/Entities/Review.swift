@@ -19,13 +19,17 @@ final class Review: Model {
     @Field(key: "stars")
     var stars: Int
     
+    @Field(key: "created_at")
+    var createdAt: Date
+    
     init() {}
     
-    init(id: UUID? = nil, userID: UUID, placeID: String, text: String, stars: Int) {
+    init(id: UUID? = nil, userID: UUID, placeID: String, text: String, stars: Int, createdAt: Date = Date()) {
         self.id = id
         self.$user.id = userID
         self.placeID = placeID
         self.text = text
         self.stars = stars
+        self.createdAt = createdAt
     }
 }
