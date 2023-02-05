@@ -34,7 +34,8 @@ struct UserController: RouteCollection {
         routes.group("review") { review in
             review.group(UserAuthenticator()) { authenticated in
                 authenticated.post("", use: postReview)
-                authenticated.get("", use: getReviews)
+                authenticated.get("", use: getAllReviews)
+                authenticated.get(":placeID", use: getReviewsForPlace)
             }
         }
     }
@@ -217,7 +218,7 @@ struct UserController: RouteCollection {
         return req.reviews.create(review).transform(to: .ok)
     }
     
-    private func getReviews(_ req: Request) throws -> EventLoopFuture<[ReviewResponse]> {
+    private func getAllReviews(_ req: Request) throws -> EventLoopFuture<[ReviewResponse]> {
         let payload = try req.auth.require(Payload.self)
         
         return req.users
@@ -226,6 +227,27 @@ struct UserController: RouteCollection {
             .flatMap { user in
                 user.$reviews
                     .get(on: req.db)
+                    .mapEach {
+                        ReviewResponse(profileImageData: user.profileImage, authorName: user.name, reviewText: $0.text, rating: $0.stars, createdAt: $0.createdAt)
+                    }
+            }
+    }
+    
+    private func getReviewsForPlace(_ req: Request) throws -> EventLoopFuture<[ReviewResponse]> {
+        let payload = try req.auth.require(Payload.self)
+
+        guard let placeID = req.parameters.get("placeID") else {
+            throw Abort(.badRequest)
+        }
+        
+        return req.users
+            .find(id: payload.userID)
+            .unwrap(or: AuthenticationError.userNotFound)
+            .flatMap { user in
+                user.$reviews
+                    .query(on: req.db)
+                    .filter(\.$placeID == placeID)
+                    .all()
                     .mapEach {
                         ReviewResponse(profileImageData: user.profileImage, authorName: user.name, reviewText: $0.text, rating: $0.stars, createdAt: $0.createdAt)
                     }
