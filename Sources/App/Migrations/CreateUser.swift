@@ -15,8 +15,6 @@ struct CreateUser: Migration {
             .field("email", .string, .required)
             .field("name", .string, .required)
             .field("profile_image", .data)
-            .field("following_count", .int, .required)
-            .field("followers_count", .int, .required)
 //            .field("is_admin", .bool, .required, .custom("DEFAULT FALSE"))
 //            .field("is_email_verified", .bool, .required, .custom("DEFAULT FALSE"))
             .unique(on: "email")
