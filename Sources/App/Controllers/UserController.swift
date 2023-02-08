@@ -217,7 +217,8 @@ struct UserController: RouteCollection {
         let review = Review(userID: payload.userID,
                             placeID: postReviewRequest.placeID,
                             text: postReviewRequest.text,
-                            stars: postReviewRequest.stars)
+                            stars: postReviewRequest.stars,
+                            createdAt: postReviewRequest.createdAt)
         
         return req.reviews.create(review).transform(to: .ok)
     }

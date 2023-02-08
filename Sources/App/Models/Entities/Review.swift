@@ -24,7 +24,7 @@ final class Review: Model {
     
     init() {}
     
-    init(id: UUID? = nil, userID: UUID, placeID: String, text: String, stars: Int, createdAt: Date = Date()) {
+    init(id: UUID? = nil, userID: UUID, placeID: String, text: String, stars: Int, createdAt: Date) {
         self.id = id
         self.$user.id = userID
         self.placeID = placeID

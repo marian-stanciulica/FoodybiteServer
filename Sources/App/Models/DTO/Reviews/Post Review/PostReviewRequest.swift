@@ -4,6 +4,7 @@ struct PostReviewRequest: Content {
     let placeID: String
     let text: String
     let stars: Int
+    let createdAt: Date
 }
 
 extension PostReviewRequest: Validatable {
