@@ -44,21 +44,20 @@ final class User: Model, Authenticatable {
         var name: String
         var email: String
         var profileImage: Data?
-        var reviews: [Review]
         
-        init(id: UUID?, email: String, name: String, profileImage: Data?, reviews: [Review]) {
+        init(id: UUID?, email: String, name: String, profileImage: Data?) {
             self.id = id
             self.email = email
             self.name = name
             self.profileImage = profileImage
-            self.reviews = reviews
         }
     }
+    
 }
 
 extension User {
-    func asPublic(reviews: [Review]) -> Public {
-        return Public(id: id, email: email, name: name, profileImage: profileImage, reviews: reviews)
+    func asPublic() -> Public {
+        return Public(id: id, email: email, name: name, profileImage: profileImage)
     }
 }
 

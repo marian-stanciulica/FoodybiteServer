@@ -42,14 +42,11 @@ struct UserController: RouteCollection {
     
     private func getCurrentUser(_ req: Request) throws -> EventLoopFuture<User.Public> {
         let payload = try req.auth.require(Payload.self)
-
+        
         return req.users
             .find(id: payload.userID)
             .unwrap(or: AuthenticationError.userNotFound)
-            .flatMap { user in
-                user.$reviews.get(on: req.db)
-                    .map { user.asPublic(reviews: $0) }
-            }
+            .map { $0.asPublic() }
     }
     
     private func signup(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
@@ -104,10 +101,11 @@ struct UserController: RouteCollection {
                 let token = req.random.generate(bits: 256)
                 let refreshToken = try RefreshToken(token: SHA256.hash(token), userID: user.requireID())
                 
-                return req.refreshTokens.create(refreshToken).and(user.$reviews.get(on: req.db))
-                    .flatMapThrowing { _, reviews in
+                return req.refreshTokens
+                    .create(refreshToken)
+                    .flatMapThrowing {
                         try LoginResponse(
-                            user: user.asPublic(reviews: reviews),
+                            user: user.asPublic(),
                             token: AuthToken(
                                 accessToken: req.jwt.sign(Payload(with: user)),
                                 refreshToken: token
@@ -197,9 +195,7 @@ struct UserController: RouteCollection {
                 user.name = updateAccountRequest.name
                 user.email = updateAccountRequest.email
                 user.profileImage = updateAccountRequest.profileImage
-                
-                return user.$reviews.get(on: req.db).and(user.update(on: req.db))
-                    .map { reviews, _ in user.asPublic(reviews: reviews) }
+                return user.update(on: req.db).map { user.asPublic() }
             }
     }
     
