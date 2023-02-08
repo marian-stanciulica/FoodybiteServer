@@ -26,12 +26,6 @@ final class User: Model, Authenticatable {
     @Field(key: "profile_image")
     var profileImage: Data?
     
-    @Field(key: "followers_count")
-    var followersCount: Int
-    
-    @Field(key: "following_count")
-    var followingCount: Int
-    
     @Children(for: \.$user)
     var reviews: [Review]
 
@@ -43,8 +37,6 @@ final class User: Model, Authenticatable {
         self.password = password
         self.name = name
         self.profileImage = profileImage
-        self.followingCount = 0
-        self.followersCount = 0
     }
     
     final class Public: Content {
@@ -52,22 +44,21 @@ final class User: Model, Authenticatable {
         var name: String
         var email: String
         var profileImage: Data?
-        var followingCount = 0
-        var followersCount = 0
+        var reviews: [Review]
         
-        init(id: UUID?, email: String, name: String, profileImage: Data?) {
+        init(id: UUID?, email: String, name: String, profileImage: Data?, reviews: [Review]) {
             self.id = id
             self.email = email
             self.name = name
             self.profileImage = profileImage
+            self.reviews = reviews
         }
     }
-    
 }
 
 extension User {
-    func asPublic() -> Public {
-        return Public(id: id, email: email, name: name, profileImage: profileImage)
+    func asPublic(reviews: [Review]) -> Public {
+        return Public(id: id, email: email, name: name, profileImage: profileImage, reviews: reviews)
     }
 }
 
