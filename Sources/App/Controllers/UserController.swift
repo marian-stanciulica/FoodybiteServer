@@ -229,7 +229,7 @@ struct UserController: RouteCollection {
                 user.$reviews
                     .get(on: req.db)
                     .mapEach {
-                        ReviewResponse(profileImageData: user.profileImage, authorName: user.name, reviewText: $0.text, rating: $0.stars, createdAt: $0.createdAt)
+                        ReviewResponse(placeID: $0.placeID, profileImageData: user.profileImage, authorName: user.name, reviewText: $0.text, rating: $0.stars, createdAt: $0.createdAt)
                     }
             }
     }
@@ -250,7 +250,7 @@ struct UserController: RouteCollection {
                     .filter(\.$placeID == placeID)
                     .all()
                     .mapEach {
-                        ReviewResponse(profileImageData: user.profileImage, authorName: user.name, reviewText: $0.text, rating: $0.stars, createdAt: $0.createdAt)
+                        ReviewResponse(placeID: $0.placeID, profileImageData: user.profileImage, authorName: user.name, reviewText: $0.text, rating: $0.stars, createdAt: $0.createdAt)
                     }
             }
     }
