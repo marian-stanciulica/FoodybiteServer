@@ -19,4 +19,4 @@ This is the backend app I wrote in `Swift` using `Vapor` for the [Foodybite](htt
 
 ## Credits
 
-![Vapor Authentication Template](https://github.com/madsodgaard/vapor-auth-template#readme) by Mads Odgaard
+[Vapor Authentication Template](https://github.com/madsodgaard/vapor-auth-template#readme) by Mads Odgaard
