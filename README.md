@@ -1,6 +1,6 @@
 # FoodybiteServer
 
-This is the backend app I wrote in `Swift` using `Vapor` for the ![Foodybite](https://github.com/Marian25/Foodybite) app.
+This is the backend app I wrote in `Swift` using `Vapor` for the [Foodybite](https://github.com/Marian25/Foodybite) app.
 
 ## Routes
 
