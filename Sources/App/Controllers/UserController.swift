@@ -18,10 +18,9 @@ struct UserController: RouteCollection {
         routes.group("auth") { auth in
             auth.on(.POST, "signup", body: .collect(maxSize: "10mb"), use: signup)
             auth.post("login", use: login)
-            auth.post("accessToken", use: refreshAccessToken)
             
             auth.group(UserAuthenticator()) { authenticated in
-                authenticated.get("me", use: getCurrentUser)
+                authenticated.post("accessToken", use: refreshAccessToken)
                 
                 authenticated.post("changePassword", use: changePassword)
                 authenticated.post("account", use: updateAccount)
@@ -38,15 +37,6 @@ struct UserController: RouteCollection {
                 authenticated.get(":placeID", use: getReviewsForPlace)
             }
         }
-    }
-    
-    private func getCurrentUser(_ req: Request) throws -> EventLoopFuture<User.Public> {
-        let payload = try req.auth.require(Payload.self)
-        
-        return req.users
-            .find(id: payload.userID)
-            .unwrap(or: AuthenticationError.userNotFound)
-            .map { $0.asPublic() }
     }
     
     private func signup(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
