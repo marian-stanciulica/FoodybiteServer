@@ -201,7 +201,7 @@ struct UserController: RouteCollection {
         let postReviewRequest = try req.content.decode(PostReviewRequest.self)
         
         let review = Review(userID: payload.userID,
-                            placeID: postReviewRequest.placeID,
+                            restaurantID: postReviewRequest.restaurantID,
                             text: postReviewRequest.text,
                             stars: postReviewRequest.stars,
                             createdAt: postReviewRequest.createdAt)
@@ -219,7 +219,7 @@ struct UserController: RouteCollection {
                 user.$reviews
                     .get(on: req.db)
                     .mapEach {
-                        ReviewResponse(placeID: $0.placeID, profileImageData: user.profileImage, authorName: user.name, reviewText: $0.text, rating: $0.stars, createdAt: $0.createdAt)
+                        ReviewResponse(restaurantID: $0.restaurantID, profileImageData: user.profileImage, authorName: user.name, reviewText: $0.text, rating: $0.stars, createdAt: $0.createdAt)
                     }
             }
     }
@@ -237,10 +237,10 @@ struct UserController: RouteCollection {
             .flatMap { user in
                 user.$reviews
                     .query(on: req.db)
-                    .filter(\.$placeID == placeID)
+                    .filter(\.$restaurantID == placeID)
                     .all()
                     .mapEach {
-                        ReviewResponse(placeID: $0.placeID, profileImageData: user.profileImage, authorName: user.name, reviewText: $0.text, rating: $0.stars, createdAt: $0.createdAt)
+                        ReviewResponse(restaurantID: $0.restaurantID, profileImageData: user.profileImage, authorName: user.name, reviewText: $0.text, rating: $0.stars, createdAt: $0.createdAt)
                     }
             }
     }

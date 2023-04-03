@@ -5,7 +5,7 @@ struct CreateReview: Migration {
         return database.schema("reviews")
             .id()
             .field("user_id", .uuid, .required, .references("users", "id", onDelete: .cascade))
-            .field("place_id", .string, .required)
+            .field("restaurant_id", .string, .required)
             .field("text", .string, .required)
             .field("stars", .uint, .required)
             .field("created_at", .date, .required)
