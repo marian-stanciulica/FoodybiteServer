@@ -2,6 +2,28 @@
 
 This is the backend app I wrote in `Swift` using `Vapor` for the [Foodybite](https://github.com/Marian25/Foodybite) app.
 
+## Installation Guide
+
+### 1. Vapor
+Install Vapor by running the following command in terminal:
+```bash
+brew install vapor
+```
+
+### 2. (Optional) Install Docker
+If you don't have Docker already installed use the [link](https://www.docker.com/products/docker-desktop/) and follow the instructions to install it.
+
+### 3. Run DB server
+Run the Postgres server in a Docker container by running the following command:
+```bash
+docker run --name postgres -e POSTGRES_DB=vapor_database \
+  -e POSTGRES_USER=vapor_username \
+  -e POSTGRES_PASSWORD=vapor_password \
+  -p 5432:5432 -d postgres
+```
+
+### 4. Run the project
+
 ## Routes
 
 | Path | Method | Requires Authentication | Description |
