@@ -13,8 +13,14 @@ brew install vapor
 ### 2. (Optional) Install Docker
 If you don't have Docker already installed use the [link](https://www.docker.com/products/docker-desktop/) and follow the instructions to install it.
 
-### 3. Run DB server
-Run the Postgres server in a Docker container by running the following command:
+### 3. Dowload Postgres DB
+Run the following command to download the postgres image in docker:
+```bash
+docker pull postgres
+```
+
+### 4. Run DB server
+Go to the main directory of the project and run the following command:
 ```bash
 docker run --name postgres -e POSTGRES_DB=vapor_database \
   -e POSTGRES_USER=vapor_username \
