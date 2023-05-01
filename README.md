@@ -10,16 +10,26 @@ Install Vapor by running the following command in terminal:
 brew install vapor
 ```
 
-### 2. (Optional) Install Docker
-If you don't have Docker already installed use the [link](https://www.docker.com/products/docker-desktop/) and follow the instructions to install it.
+### 2. Install Docker
+Run the following command to install Docker:
+```bash
+brew install --cask docker
+```
 
-### 3. Dowload Postgres DB
-Run the following command to download the postgres image in docker:
+You can refer to this [article](https://arctype.com/postgres/install/docker-mac-postgres) for additional details.
+
+### 3. Run the Docker daemon
+```bash
+open -a Docker
+```
+
+### 4. Dowload Postgres Docker Image
+Wait until Docker initialisation finishes and run the following command to download the Postgres image:
 ```bash
 docker pull postgres
 ```
 
-### 4. Run DB server
+### 5. Run Postgres
 Go to the main directory of the project and run the following command:
 ```bash
 docker run --name postgres -e POSTGRES_DB=vapor_database \
@@ -28,7 +38,8 @@ docker run --name postgres -e POSTGRES_DB=vapor_database \
   -p 5432:5432 -d postgres
 ```
 
-### 4. Run the project
+### 6. Run the project
+Open Package.swift using Xcode, compile and run the project
 
 ## Routes
 
