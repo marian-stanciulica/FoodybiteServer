@@ -30,7 +30,6 @@ docker pull postgres
 ```
 
 ### 5. Run Postgres
-Go to the main directory of the project and run the following command:
 ```bash
 docker run --name postgres -e POSTGRES_DB=vapor_database \
   -e POSTGRES_USER=vapor_username \
