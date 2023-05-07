@@ -4,7 +4,6 @@ struct RegisterRequest: Content {
     let name: String
     let email: String
     let password: String
-    let confirm_password: String
     let profile_image: Data?
 }
 

@@ -42,9 +42,6 @@ struct UserController: RouteCollection {
     private func signup(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         try RegisterRequest.validate(content: req)
         let registerRequest = try req.content.decode(RegisterRequest.self)
-        guard registerRequest.password == registerRequest.confirm_password else {
-            throw AuthenticationError.passwordsDontMatch
-        }
         
         return req.password
             .async
